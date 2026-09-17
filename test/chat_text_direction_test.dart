@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hermes_android/core/screens/chat_screen.dart';
@@ -49,7 +50,8 @@ void main() {
           tester.widget<MarkdownBody>(markdown).styleSheet!.textAlign,
           WrapAlignment.start,
         );
-        final prose = tester.widget<RichText>(
+        // RichText can inherit direction; verify the resolved renderer.
+        final prose = tester.renderObject<RenderParagraph>(
           find.descendant(
             of: markdown,
             matching: find.byWidgetPredicate(
