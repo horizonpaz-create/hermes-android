@@ -166,7 +166,7 @@ void main() {
 
   testWidgets('message and fenced code copy retain original source', (tester) async {
     const code = 'print("سلام");\n';
-    const source = 'Hello فارسی\n\n```dart\n${code}```\n\nHello';
+    const source = 'Hello فارسی\n\n```dart\n$code```\n\nHello';
     final copied = <String>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
