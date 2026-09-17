@@ -22,9 +22,40 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze --no-pub
       - run: flutter test --no-pub
-      - run: flutter build apk --debug --target-platform android-arm64
+      - name: Prepare private release signing
+        env:
+          SIGNING_STORE: ${{ secrets.POUYA_SIGNING_STORE }}
+          SIGNING_PASSWORD: ${{ secrets.POUYA_SIGNING_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os, base64
+          from pathlib import Path
+          store = Path(os.environ['RUNNER_TEMP']) / 'hermes-release.p12'
+          store.write_bytes(base64.b64decode(os.environ['SIGNING_STORE']))
+          store.chmod(0o600)
+          password = os.environ['SIGNING_PASSWORD']
+          Path('key.properties').write_text(f'storeFile={store}\nstorePassword={password}\nkeyAlias=hermes\nkeyPassword={password}\n')
+          PY
+      - run: flutter build apk --release --split-per-abi --target-platform android-arm64
+      - name: Verify signed installable APK
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os, subprocess
+          tools = sorted((Path(os.environ['ANDROID_HOME']) / 'build-tools').glob('*/apksigner'))
+          signer = tools[-1]
+          apk = Path('build/app/outputs/flutter-apk/app-arm64-v8a-release.apk')
+          subprocess.run([str(signer), 'verify', '--verbose', str(apk)], check=True)
+          result = subprocess.check_output([str(signer.parent / 'aapt'), 'dump', 'badging', str(apk)], text=True)
+          assert "name='com.hermesagent.hermes_android.pouya'" in result
+          assert "application-label:'Hermes Agent'" in result
+          assert 'application-debuggable' not in result
+          assert apk.stat().st_size < 49_000_000
+          print(result)
+          print('APK_BYTES=', apk.stat().st_size)
+          PY
       - uses: actions/upload-artifact@v4
         with:
-          name: hermes-rtl-test-arm64
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          name: hermes-rtl-release-arm64
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
           retention-days: 7

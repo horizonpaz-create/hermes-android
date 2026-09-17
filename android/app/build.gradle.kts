@@ -58,6 +58,7 @@ android {
            manifestPlaceholders["appLabel"] = "Hermes Agent Dev"
        }
        release {
+           applicationIdSuffix = ".pouya"
            // CI/local analysis may build a release artifact without access to
            // the private distribution keystore. Never fall back to the debug
            // key: leave the APK explicitly unsigned until the real
