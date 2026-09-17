@@ -16,6 +16,69 @@ void main() {
   });
 
   testWidgets(
+    'multiline keyboard never sends; explicit Send preserves newlines',
+    (tester) async {
+      var submitCount = 0;
+      String? submittedText;
+      await _pumpChat(
+        tester,
+        voice: FakeVoiceComposerAdapter(),
+        remoteSubmit:
+            ({required sessionId, required text, required onEvent}) async {
+              submitCount += 1;
+              submittedText = text;
+            },
+      );
+      final composer = find.byKey(const Key('chat-message-composer'));
+      await tester.enterText(composer, 'سلام\nHello\nخط سوم');
+      await tester.pump();
+      final field = tester.widget<TextField>(composer);
+      expect(field.keyboardType, TextInputType.multiline);
+      expect(field.textInputAction, TextInputAction.newline);
+      expect(field.textDirection, TextDirection.rtl);
+      expect(field.textAlign, TextAlign.start);
+      expect(field.onSubmitted, isNull);
+      // The IME inserts newlines as editing updates; its action must not send
+      // or unfocus a multiline draft either.
+      await tester.testTextInput.receiveAction(TextInputAction.newline);
+      await tester.pump();
+      expect(submitCount, 0);
+      expect(field.controller!.text, 'سلام\nHello\nخط سوم');
+      expect(
+        tester.widget<EditableText>(find.byType(EditableText)).focusNode.hasFocus,
+        isTrue,
+      );
+
+      await tester.tap(find.byTooltip('Send'));
+      await tester.pumpAndSettle();
+      expect(submitCount, 1);
+      expect(submittedText, 'سلام\nHello\nخط سوم');
+    },
+  );
+
+  testWidgets('composer direction follows typing and controller edits', (
+    tester,
+  ) async {
+    await _pumpChat(tester, voice: FakeVoiceComposerAdapter());
+    final composer = find.byKey(const Key('chat-message-composer'));
+    for (final entry in <String, TextDirection>{
+      'سلام English English': TextDirection.rtl,
+      'Hello فارسی فارسی': TextDirection.ltr,
+      '۱۲۳؟ مرحبا': TextDirection.rtl,
+      '': TextDirection.ltr,
+    }.entries) {
+      await tester.enterText(composer, entry.key);
+      await tester.pump();
+      expect(tester.widget<TextField>(composer).textDirection, entry.value);
+    }
+    // Voice, shared text, editing a message and clearing after sending all
+    // mutate the controller rather than going through TextField.onChanged.
+    tester.widget<TextField>(composer).controller!.text = 'متن جایگزین';
+    await tester.pump();
+    expect(tester.widget<TextField>(composer).textDirection, TextDirection.rtl);
+  });
+
+  testWidgets(
     'partial and final only edit composer; explicit Send submits exactly once',
     (tester) async {
       final voice = FakeVoiceComposerAdapter();

@@ -34,6 +34,7 @@ import '../models/gateway_sensitive_prompt.dart';
 import '../models/gateway_turn_contract.dart';
 import '../utils/chat_display_items.dart';
 import '../utils/chat_history_scroll.dart';
+import '../utils/chat_text_direction.dart';
 import '../utils/message_content.dart';
 import '../utils/responsive.dart';
 import '../utils/turn_recovery_fallback.dart';
@@ -2928,27 +2929,31 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                   child: Semantics(
                     label: 'Message',
                     textField: true,
-                    child: TextField(
-                      key: const Key('chat-message-composer'),
-                      controller: _textController,
-                      decoration: InputDecoration(
-                        hintText: 'Message Hermes…',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
+                    child: ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: _textController,
+                      builder: (context, value, child) => TextField(
+                        key: const Key('chat-message-composer'),
+                        controller: _textController,
+                        textDirection: chatTextDirection(value.text),
+                        textAlign: TextAlign.start,
+                        decoration: InputDecoration(
+                          hintText: 'Message Hermes…',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          isDense: true,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        isDense: true,
+                        minLines: 1,
+                        maxLines: 5,
+                        textCapitalization: TextCapitalization.sentences,
+                        keyboardType: TextInputType.multiline,
+                        textInputAction: TextInputAction.newline,
+                        enabled: !_loading && !_streaming,
                       ),
-                      minLines: 1,
-                      maxLines: 5,
-                      textCapitalization: TextCapitalization.sentences,
-                      keyboardType: TextInputType.multiline,
-                      textInputAction: TextInputAction.send,
-                      enabled: !_loading && !_streaming,
-                      onSubmitted: (_) => _sendMessage(),
                     ),
                   ),
                 ),
@@ -3449,13 +3454,17 @@ class MessageBubble extends StatelessWidget {
             ...splitMarkdownCodeBlocks(content).map(
               (segment) => segment is MarkdownCodeBlock
                   ? segment
-                  : MarkdownBody(
-                      data: segment as String,
-                      selectable: false,
-                      styleSheet: _messageStyleSheet(
-                        theme,
-                        isUser: isUser,
-                        assistantTextColor: assistantTextColor,
+                  : Directionality(
+                      textDirection: chatTextDirection(segment as String),
+                      child: MarkdownBody(
+                        data: segment,
+                        selectable: false,
+                        fitContent: false,
+                        styleSheet: _messageStyleSheet(
+                          theme,
+                          isUser: isUser,
+                          assistantTextColor: assistantTextColor,
+                        ),
                       ),
                     ),
             ),

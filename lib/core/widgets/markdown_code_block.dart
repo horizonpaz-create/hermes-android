@@ -75,6 +75,8 @@ class _MarkdownCodeBlockState extends State<MarkdownCodeBlock> {
     final body = _wrap
         ? SelectableText(
             widget.code,
+            textDirection: TextDirection.ltr,
+            textAlign: TextAlign.start,
             style: TextStyle(
               fontFamily: 'monospace',
               fontSize: 13,
@@ -86,6 +88,8 @@ class _MarkdownCodeBlockState extends State<MarkdownCodeBlock> {
             scrollDirection: Axis.horizontal,
             child: SelectableText(
               widget.code,
+              textDirection: TextDirection.ltr,
+              textAlign: TextAlign.start,
               style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 13,
@@ -167,7 +171,10 @@ class _MarkdownCodeBlockState extends State<MarkdownCodeBlock> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-            child: body,
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: body,
+            ),
           ),
         ],
       ),
