@@ -42,6 +42,7 @@ import 'files_screen.dart';
 import '../widgets/gateway_activity_card.dart';
 import '../widgets/chat_context_header.dart';
 import '../widgets/markdown_code_block.dart';
+import '../widgets/chat_markdown_body.dart';
 import '../widgets/attachment_draft_tile.dart';
 import '../widgets/chat_end_affordance.dart';
 import '../widgets/gateway_approval_dialog.dart';
@@ -3454,17 +3455,12 @@ class MessageBubble extends StatelessWidget {
             ...splitMarkdownCodeBlocks(content).map(
               (segment) => segment is MarkdownCodeBlock
                   ? segment
-                  : Directionality(
-                      textDirection: chatTextDirection(segment as String),
-                      child: MarkdownBody(
-                        data: segment,
-                        selectable: false,
-                        fitContent: false,
-                        styleSheet: _messageStyleSheet(
-                          theme,
-                          isUser: isUser,
-                          assistantTextColor: assistantTextColor,
-                        ),
+                  : ChatMarkdownBody(
+                      data: segment as String,
+                      styleSheet: _messageStyleSheet(
+                        theme,
+                        isUser: isUser,
+                        assistantTextColor: assistantTextColor,
                       ),
                     ),
             ),

@@ -165,7 +165,8 @@ v2.0.0 merges the community Remote Gateway edition from
 - **Memory viewer** — inspect conversation memory across sessions.
 - **Verbose mode toggle** — show raw message metadata (role, tool calls, timestamps) in chat.
 - **Three-way theme toggle** — Dark / Light / System default.
-- **Keyboard handling** — auto-scroll on keyboard open, send action on Enter, FAB to scroll to bottom.
+- **Keyboard handling** — auto-scroll on keyboard open, Enter inserts a newline, send with the send button, FAB to scroll to bottom.
+- **Persian/Arabic chat** — each rendered prose line containing an RTL letter is right-to-left, even when it starts in English. English-only and URL-only lines stay left-to-right. Latin runs are isolated after Markdown parsing; link destinations, inline/fenced code, and copied message source are not rewritten.
 - **Voice chat** — microphone dictation sends recognised speech to Hermes, with optional text-to-speech replies.
 
 ## Screenshots
@@ -399,7 +400,7 @@ Android app (Flutter)
 
 ### Chat screen
 
-- **Send messages** — Type in the input field and tap the send button or press Enter.
+- **Send messages** — Type in the input field and tap the send button. Enter inserts a newline.
 - **Streaming responses** — The agent's response appears token-by-token in real-time. The chat auto-scrolls to the bottom as new tokens arrive.
 - **Tool progress** — When the agent uses tools, inline progress messages show the tool name, status, and progress.
 - **Verbose mode** — Toggle in the app settings to show raw message metadata (role, tool call IDs, timestamps).
