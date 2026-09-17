@@ -63,7 +63,8 @@ void main() {
     final composer = find.byKey(const Key('chat-message-composer'));
     for (final entry in <String, TextDirection>{
       'سلام English English': TextDirection.rtl,
-      'Hello فارسی فارسی': TextDirection.ltr,
+      'Hello فارسی فارسی': TextDirection.rtl,
+      'Hello English only': TextDirection.ltr,
       '۱۲۳؟ مرحبا': TextDirection.rtl,
       '': TextDirection.ltr,
     }.entries) {
